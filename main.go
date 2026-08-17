@@ -28,7 +28,13 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  %s server --addr :8080          start the HTTP server\n", os.Args[0])
 		flag.PrintDefaults()
 	}
-	flag.Parse()
+	args := os.Args[1:]
+	if len(args) > 0 && args[0] == "server" {
+		args = args[1:]
+	}
+	if err := flag.CommandLine.Parse(args); err != nil {
+		os.Exit(2)
+	}
 
 	if smokeTest {
 		if err := selfcheck.Run(); err != nil {
@@ -41,11 +47,8 @@ func main() {
 
 	// Support an optional "server" subcommand for explicitness, while still
 	// allowing bare invocation with flags only.
-	args := flag.Args()
-	if len(args) > 0 && args[0] == "server" {
-		// addr already parsed via flag; remaining args ignored.
-	} else if len(args) > 0 {
-		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", args[0])
+	if len(flag.Args()) > 0 {
+		fmt.Fprintf(os.Stderr, "unknown subcommand: %s\n", flag.Args()[0])
 		os.Exit(2)
 	}
 
